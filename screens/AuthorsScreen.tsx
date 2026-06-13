@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import useFetch from '../hooks/useFetch';
+import { useQuery } from '@tanstack/react-query';
 import { API_BASE } from '../constants/api';
 
 interface Author {
@@ -16,9 +16,17 @@ interface Author {
 }
 
 export default function AuthorsScreen() {
-  const { data, loading, error } = useFetch<Author[]>(`${API_BASE}/authors`);
+  const { data, isLoading, error } = useQuery<Author[], Error>({
+    queryKey: ['authors'],
+    queryFn: () =>
+      fetch(`${API_BASE}/authors`).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }),
+    staleTime: 30 * 1000,
+  });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
@@ -30,7 +38,7 @@ export default function AuthorsScreen() {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>에러: {error}</Text>
+        <Text style={styles.error}>에러: {error.message}</Text>
         <StatusBar style="auto" />
       </View>
     );
@@ -40,7 +48,7 @@ export default function AuthorsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>저자 목록</Text>
+      <Text style={styles.title}>저자 목록 (TanStack Query — 30s cache)</Text>
       <FlatList
         data={authors}
         keyExtractor={(item) => String(item.id)}
