@@ -2,21 +2,22 @@ import { StatusBar } from 'expo-status-bar';
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import useFetch from './hooks/useFetch';
+import useFetch from '../hooks/useFetch';
+import { API_BASE } from '../constants/api';
 
-const API_BASE = Platform.select({
-  android: 'http://10.0.2.2:3000',
-  ios: 'http://localhost:3000',
-  default: 'http://localhost:3000',
-});
+interface Book {
+  id: string;
+  title: string;
+  authorId: string;
+  year: number;
+}
 
-export default function App() {
-  const { data, loading, error } = useFetch(`${API_BASE}/books`);
+export default function BooksScreen() {
+  const { data, loading, error } = useFetch<Book[]>(`${API_BASE}/books`);
 
   if (loading) {
     return (
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 48,
+    paddingTop: 16,
     paddingHorizontal: 16,
   },
   center: {

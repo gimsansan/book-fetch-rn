@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-export default function useFetch(url: string) {
-  const [data, setData] = useState<unknown>(null);
+export default function useFetch<T>(url: string) {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const cancelledRef = useRef(false);
@@ -12,7 +12,7 @@ export default function useFetch(url: string) {
       setLoading(true);
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const json: T = await res.json();
       if (!cancelledRef.current) { setData(json); setError(null); }
     } catch (err) {
       if (!cancelledRef.current) {
